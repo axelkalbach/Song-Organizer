@@ -1,7 +1,7 @@
 import pandas as pd
 import pickle
 
-local_excel_file = 'C:/Firefox Downloads/test.xlsx'
+local_excel_file = 'C:/PyCharm/music_finder/test.xlsx'
 
 camelots = ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B', '7A', '7B', '8A', '8B', '9A', '9B', '10A', '10B', '11A', '11B', '12A', '12B']
 
@@ -115,7 +115,9 @@ if choice == 'y' or choice == 'Y':
         i += 1
     # sort by key
     tracks.sort(key=lambda x: x.camelot)
-    write(tracks)
+    choice = input('Update persistent file with changes? (Y/N): ')
+    if choice == 'y' or choice == 'Y':
+        write(tracks)
 
 # decide to write data to local file used during mixing
 choice = input('write data to local excel file? (Y/N): ')
