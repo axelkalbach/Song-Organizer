@@ -1,7 +1,6 @@
 import pandas as pd
 import pickle
-
-local_excel_file = 'C:/PyCharm/music_finder/test.xlsx'
+import os
 
 camelots = ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B', '7A', '7B', '8A', '8B', '9A', '9B', '10A', '10B', '11A', '11B', '12A', '12B']
 
@@ -80,6 +79,9 @@ def read():
         return []
 
 
+curr_dir = os.getcwd()
+local_excel_file = curr_dir + '\\test.xlsx'
+
 # read data from the binary file
 tracks = read()
 # choose to read from exported spotify file or not
@@ -105,9 +107,10 @@ if choice == 'y' or choice == 'Y':
 choice = input('Update keys? (Y/N): ')
 if choice == 'y' or choice == 'Y':
     i = 0
+    print("Total tracks:", len(tracks))
     for track in tracks:
         if track.camelot == 'N/A':
-            print(i, track.name, track.artist)
+            print(str(i) + ":", track.name, track.artist)
             new_key = input('New key: ').upper()
             if new_key not in camelots:
                 break
@@ -120,7 +123,7 @@ if choice == 'y' or choice == 'Y':
         write(tracks)
 
 # decide to write data to local file used during mixing
-choice = input('write data to local excel file? (Y/N): ')
+choice = input('write data to local excel file({})? (Y/N): '.format(local_excel_file))
 if choice == 'y' or choice == 'Y':
 
     # create 2d array and append metata to each row
