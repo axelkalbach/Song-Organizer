@@ -2,7 +2,8 @@ import pandas as pd
 import pickle
 import os
 
-camelots = ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B', '7A', '7B', '8A', '8B', '9A', '9B', '10A', '10B', '11A', '11B', '12A', '12B']
+camelots = ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B', '7A', '7B', '8A', '8B', '9A', '9B',
+            '10A', '10B', '11A', '11B', '12A', '12B']
 
 # track class used throughout, contains metadata about a given track
 class Track:
@@ -85,7 +86,7 @@ local_excel_file = curr_dir + '\\test.xlsx'
 # read data from the binary file
 tracks = read()
 # choose to read from exported spotify file or not
-choice = input('read new data from exportify excel file? (Y/N): ')
+choice = input('Read new data from exportify excel file? (Y/N): ')
 if choice == 'y' or choice == 'Y':
     # create pandas DataFrame object from the excel file
     df = pd.read_excel('file:C:/Firefox Downloads/all1.2.xlsx')
@@ -98,7 +99,7 @@ if choice == 'y' or choice == 'Y':
             # create new track with metadata from the DataFrame and add to list of tracks
             new_track = Track(row['Track Name'], row['Artist Name'], tried_camelot, int(round(row['Tempo'])), genre)
             tracks.append(new_track)
-    print('successfully read')
+    print('Successfully read')
     # sort by key
     tracks.sort(key=lambda x: x.camelot)
     # write new data to binary file
@@ -123,7 +124,7 @@ if choice == 'y' or choice == 'Y':
         write(tracks)
 
 # decide to write data to local file used during mixing
-choice = input('write data to local excel file({})? (Y/N): '.format(local_excel_file))
+choice = input('Write data to local excel file({})? (Y/N): '.format(local_excel_file))
 if choice == 'y' or choice == 'Y':
 
     # create 2d array and append metata to each row
@@ -134,7 +135,7 @@ if choice == 'y' or choice == 'Y':
     # write data to a new DataFrame object and transfer to excel file
     excel_df = pd.DataFrame(tracks_df, columns={'Track Name', 'Artist Name', 'Key', 'Tempo', 'Genre'})
     excel_df.to_excel(local_excel_file)
-    print('Succesfully wrote to', local_excel_file)
+    print('Successfully wrote to', local_excel_file)
 
 
 
