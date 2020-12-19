@@ -54,12 +54,18 @@ def get_key_value(input_key):
     if input_key[1:2] == 'B':
         return initial_value * 2 + 1
 
+
 def in_list(name, artist):
     for track in tracks:
         if track.name == name and track.artist == artist:
             return True
     return False
 
+
+def get_camelot(key_value, mode):
+    ordered_camelots = [['5A', '12A', '7A', '2A', '9A', '4A', '11A', '6A', '1A', '8A', '3A', '10A'],
+                        ['8B', '3B', '10B', '5B', '12B', '7B', '2B', '9B', '4B', '11B', '6B', '1B']]
+    return ordered_camelots[mode][key_value]
 
 # writes an array to binary file
 def write(arr):
@@ -83,6 +89,8 @@ def read():
 curr_dir = os.getcwd()
 local_excel_file = curr_dir + '\\test.xlsx'
 
+print(get_camelot(7, 1))
+
 # read data from the binary file
 tracks = read()
 # choose to read from exported spotify file or not
@@ -94,10 +102,10 @@ if choice == 'y' or choice == 'Y':
     for i, row in df.iterrows():
         if not in_list(row['Track Name'], row['Artist Name']):
             # attempt to get key from older versions
-            tried_camelot = try_for_camelot(row['Track Name'], row['Artist Name'])
+            camelot = get_camelot(row['Key'], row['Mode'])
             genre = get_genre(str(row['Artist Genres']))
             # create new track with metadata from the DataFrame and add to list of tracks
-            new_track = Track(row['Track Name'], row['Artist Name'], tried_camelot, int(round(row['Tempo'])), genre)
+            new_track = Track(row['Track Name'], row['Artist Name'], camelot, int(round(row['Tempo'])), genre)
             tracks.append(new_track)
     print('Successfully read')
     # sort by key
