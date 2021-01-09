@@ -1,6 +1,8 @@
 import pandas as pd
 import pickle
 import os
+from tkinter import *
+from tkinter.filedialog import askopenfilename
 
 camelots = ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B', '7A', '7B', '8A', '8B', '9A', '9B',
             '10A', '10B', '11A', '11B', '12A', '12B']
@@ -46,7 +48,7 @@ def get_genre(input_genre):
     return 'Misc.'
 
 
-# changes a key value from its alphanumeric value to a simply numeric one
+# changes a key value from its alphanumeric value to a numeric one
 def get_key_value(input_key):
     initial_value = int(input_key[0:1])
     if input_key[1:2] == 'A':
@@ -66,6 +68,38 @@ def get_camelot(key_value, mode):
     ordered_camelots = [['5A', '12A', '7A', '2A', '9A', '4A', '11A', '6A', '1A', '8A', '3A', '10A'],
                         ['8B', '3B', '10B', '5B', '12B', '7B', '2B', '9B', '4B', '11B', '6B', '1B']]
     return ordered_camelots[mode][key_value]
+
+def read_from_exportify():
+    # query for exportify location
+    Tk().withdraw()
+    exportify_file = askopenfilename(initialdir=curr_dir, title="Select your exportify file")
+    # create pandas DataFrame object from the excel file
+    df = pd.read_excel(exportify_file)
+    print('Reading from excel...')
+    for i, row in df.iterrows():
+        if not in_list(row['Track Name'], row['Artist Name']):
+            camelot = get_camelot(row['Key'], row['Mode'])
+            genre = get_genre(str(row['Artist Genres']))
+            # create new track with metadata from the DataFrame and add to list of tracks
+            new_track = Track(row['Track Name'], row['Artist Name'], camelot, int(round(row['Tempo'])), genre)
+            tracks.append(new_track)
+    print('Successfully read')
+    # sort by key
+    tracks.sort(key=lambda x: x.camelot)
+    # write new data to binary file
+    write(tracks)
+    print('added to local binary file')
+
+def write_to_excel():
+    # create 2d array and append metata to each row
+    tracks_df = []
+    for track in tracks:
+        tracks_df.append([track.name, track.artist, track.camelot, track.tempo, track.genre])
+
+    # write data to a new DataFrame object and transfer to excel file
+    excel_df = pd.DataFrame(tracks_df, columns={'Track Name', 'Artist Name', 'Key', 'Tempo', 'Genre'})
+    excel_df.to_excel(local_excel_file)
+    print('Successfully wrote to', local_excel_file)
 
 # writes an array to binary file
 def write(arr):
@@ -89,61 +123,31 @@ def read():
 curr_dir = os.getcwd()
 local_excel_file = curr_dir + '\\test.xlsx'
 
-print(get_camelot(7, 1))
+
 
 # read data from the binary file
 tracks = read()
-# choose to read from exported spotify file or not
-choice = input('Read new data from exportify excel file? (Y/N): ')
-if choice == 'y' or choice == 'Y':
-    # create pandas DataFrame object from the excel file
-    df = pd.read_excel('file:C:/Firefox Downloads/all1.2.xlsx')
-    print('Reading from excel...')
-    for i, row in df.iterrows():
-        if not in_list(row['Track Name'], row['Artist Name']):
-            # attempt to get key from older versions
-            camelot = get_camelot(row['Key'], row['Mode'])
-            genre = get_genre(str(row['Artist Genres']))
-            # create new track with metadata from the DataFrame and add to list of tracks
-            new_track = Track(row['Track Name'], row['Artist Name'], camelot, int(round(row['Tempo'])), genre)
-            tracks.append(new_track)
-    print('Successfully read')
-    # sort by key
-    tracks.sort(key=lambda x: x.camelot)
-    # write new data to binary file
-    write(tracks)
 
-choice = input('Update keys? (Y/N): ')
-if choice == 'y' or choice == 'Y':
-    i = 0
-    print("Total tracks:", len(tracks))
-    for track in tracks:
-        if track.camelot == 'N/A':
-            print(str(i) + ":", track.name, track.artist)
-            new_key = input('New key: ').upper()
-            if new_key not in camelots:
-                break
-            track.camelot = new_key
-        i += 1
-    # sort by key
-    tracks.sort(key=lambda x: x.camelot)
-    choice = input('Update persistent file with changes? (Y/N): ')
-    if choice == 'y' or choice == 'Y':
-        write(tracks)
+options = ['1', '2']
+root = Tk()
+root.geometry('350x200')
+add_btn = Button(root, text='Add Songs', command=read_from_exportify)
+add_btn.pack()
+export_btn = Button(root, text='Export to Excel File')
+export_btn.pack()
+text_var = StringVar()
+text_var.set('1')
+label = Label(root, text='choose:')
+label.pack()
+opt = OptionMenu(root, text_var, *options)
+opt.pack()
+find_btn = Button(root, text='Find Songs')
+find_btn.pack()
 
-# decide to write data to local file used during mixing
-choice = input('Write data to local excel file({})? (Y/N): '.format(local_excel_file))
-if choice == 'y' or choice == 'Y':
 
-    # create 2d array and append metata to each row
-    tracks_df = []
-    for track in tracks:
-        tracks_df.append([track.name, track.artist, track.camelot, track.tempo, track.genre])
+input_var = text_var.get()
 
-    # write data to a new DataFrame object and transfer to excel file
-    excel_df = pd.DataFrame(tracks_df, columns={'Track Name', 'Artist Name', 'Key', 'Tempo', 'Genre'})
-    excel_df.to_excel(local_excel_file)
-    print('Successfully wrote to', local_excel_file)
+root.mainloop()
 
 
 
