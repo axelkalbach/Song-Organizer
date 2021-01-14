@@ -261,6 +261,7 @@ if __name__ == '__main__':
     # read data from the binary file
     tracks = read()
 
+
     # build main window
     root = Tk()
     root.title('Song Finder')
