@@ -6,7 +6,7 @@ This script allows spotify playlists to be added to a local list of tracks and a
 3. Install requirements: ```pip install -r requirements.txt```
 # Usage
 ### Running the Program
-1. Navigate to your directory in the command line: ```cd \Your-Directory```
+1. Navigate to your directory in the command line: ```cd /Your-Directory```
 2. Run the python script: ```python music_finder.py```
 ### Add New Songs
 1. Use [this exportify tool](https://watsonbox.github.io/exportify/) to download one of your spotify playlists (make sure to enable include audio features data in settings)
