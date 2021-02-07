@@ -9,7 +9,7 @@ This script allows spotify playlists to be added to a local list of tracks and a
 1. Navigate to your directory in the command line: ```cd /Your-Directory```
 2. Run the python script: ```python music_organizer.py```
 ### Add New Songs
-1. Use [this exportify tool](https://watsonbox.github.io/exportify/) to download one of your spotify playlists (make sure to enable include audio features data in settings)
+1. Click 'Choose Playlist to Add' and you will be brought to the exportify site that allows you to download your spotify songs (make sure to enable include audio features data in settings)
 2. Click the 'Add Songs' button and select your .csv exportify file
 3. Your songs will be added to a local file
 ### Export to Excel
