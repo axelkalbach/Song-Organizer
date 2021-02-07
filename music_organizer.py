@@ -4,6 +4,7 @@ import os
 from tkinter import *
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename
+import webbrowser
 
 key_camelots = ['1A - Ab Minor',
                 '1B - B Major',
@@ -65,18 +66,18 @@ def get_relative_major_minor(camelot):
 
 # finds key that is one tone lower than given
 def get_key_down(camelot):
-    int_value = (int(camelot[0:1]) + 5) % 12
+    int_value = (int(camelot[:-1]) + 5) % 12
     if int_value == 0:
         int_value = 12
-    return str(int_value) + camelot[1:2]
+    return str(int_value) + camelot[-1]
 
 
 # finds key that is one tone higher than given
 def get_key_up(camelot):
-    int_value = (int(camelot[0:1]) + 7) % 12
+    int_value = (int(camelot[:-1]) + 7) % 12
     if int_value == 0:
         int_value = 12
-    return str(int_value) + camelot[1:2]
+    return str(int_value) + camelot[-1]
 
 
 # gets a simplistic form of the track's genre given the list of genres from the exportify file
@@ -237,6 +238,10 @@ def find_songs(status, camelot_w_key):
     cancel_btn.grid(row=12, column=0, sticky=W, padx=5, pady=5)
 
 
+def open_exportify_page():
+    webbrowser.open('https://watsonbox.github.io/exportify/')
+
+
 # writes an array to binary file
 def write(arr):
     with open('tracks.data', 'wb') as file_handle:
@@ -257,6 +262,7 @@ def read():
 
 
 if __name__ == '__main__':
+    f = open("guru99.xlsx", "w+")
 
     # read data from the binary file
     tracks = read()
@@ -267,26 +273,30 @@ if __name__ == '__main__':
     root.geometry('300x200')
     status_var = StringVar()
 
+
+
     f1 = Frame(root)
     f1.pack(pady=5)
-    add_btn = Button(f1, text='Add Songs', command=lambda: read_from_exportify(status_label))
+    exp_btn = Button(f1, text='Choose Playlist to Add', command=lambda: open_exportify_page())
+    exp_btn.pack(side=LEFT)
+    add_btn = Button(f1, text='Add Songs from .csv', command=lambda: read_from_exportify(status_label))
     add_btn.pack(side=LEFT, padx=5)
     status_label = Label(root, text='--STATUS--')
-    export_btn = Button(f1, text='Export to Excel File', command=lambda: write_to_excel(status_label))
-    export_btn.pack(side=LEFT)
+    export_btn = Button(root, text='Export to Excel File', command=lambda: write_to_excel(status_label))
+    export_btn.pack()
 
     choice = StringVar()
     key_combo = ttk.Combobox(root, values=key_camelots, textvariable=choice, width=15)
     key_combo.current(0)
-    key_combo.pack()
+    key_combo.pack(pady=5)
 
     find_btn = Button(root, text='Find Songs', command=lambda: find_songs(status_label, str(choice.get())))
-    find_btn.pack(pady=5)
+    find_btn.pack()
 
-    status_label.pack()
+    status_label.pack(pady=5)
 
     quit_btn = Button(root, text='Quit', command=lambda: root.destroy())
-    quit_btn.pack(pady=5)
+    quit_btn.pack()
 
     root.mainloop()
 
