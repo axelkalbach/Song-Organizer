@@ -120,34 +120,6 @@ def get_camelot(key_value, mode):
                         ['8B', '3B', '10B', '5B', '12B', '7B', '2B', '9B', '4B', '11B', '6B', '1B']]
     return ordered_camelots[mode][key_value]
 
-
-# reads from exportify file and writes to local tracks file
-def read_from_exportify(status):
-    # query for exportify location
-    Tk().withdraw()
-    exportify_file = askopenfilename(initialdir=os.getcwd(), title="Select your exportify file")
-    # create pandas DataFrame object from the excel file
-    df = pd.read_csv(exportify_file)
-    print('Reading from excel...')
-    status.config(text='Reading from excel...')
-    initial_length = len(tracks)
-    for i, row in df.iterrows():
-        if not in_list(row['Track Name'], row['Artist Name(s)']):
-            camelot = get_camelot(row['Key'], row['Mode'])
-            genre = get_genre(str(row['Artist Genres']))
-            # create new track with metadata from the DataFrame and add to list of tracks
-            new_track = Track(row['Track Name'], row['Artist Name(s)'], camelot, int(round(row['Tempo'])), genre)
-            tracks.append(new_track)
-    new_songs = len(tracks) - initial_length
-    print('Successfully added {} songs'.format(new_songs))
-    status.config(text='Successfully added {} songs'.format(new_songs))
-    # sort by key
-    tracks.sort(key=lambda x: x.camelot)
-    # write new data to binary file
-    write(tracks)
-    print('added to local binary file')
-
-
 # writes song list to excel file
 def write_to_excel():
     # create 2d array and append metadata to each row
