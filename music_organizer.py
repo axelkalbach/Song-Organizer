@@ -5,6 +5,8 @@ from tkinter import *
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename
 import webbrowser
+import requests
+import json
 
 key_camelots = ['1A - Ab Minor',
                 '1B - B Major',
@@ -33,6 +35,10 @@ key_camelots = ['1A - Ab Minor',
 
 camelots = ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B', '7A', '7B', '8A', '8B', '9A', '9B',
             '10A', '10B', '11A', '11B', '12A', '12B']
+
+CLIENT_ID = 'a58508ad90a64604b7d9907850ce8463'
+CLIENT_SECRET = '781511c3415049f28e60962c3f4a5b52'
+username = 'axelkalbach'
 
 
 # track class used throughout, contains metadata about a given track
@@ -126,11 +132,11 @@ def read_from_exportify(status):
     status.config(text='Reading from excel...')
     initial_length = len(tracks)
     for i, row in df.iterrows():
-        if not in_list(row['Track Name'], row['Artist Name']):
+        if not in_list(row['Track Name'], row['Artist Name(s)']):
             camelot = get_camelot(row['Key'], row['Mode'])
             genre = get_genre(str(row['Artist Genres']))
             # create new track with metadata from the DataFrame and add to list of tracks
-            new_track = Track(row['Track Name'], row['Artist Name'], camelot, int(round(row['Tempo'])), genre)
+            new_track = Track(row['Track Name'], row['Artist Name(s)'], camelot, int(round(row['Tempo'])), genre)
             tracks.append(new_track)
     new_songs = len(tracks) - initial_length
     print('Successfully added {} songs'.format(new_songs))
@@ -143,7 +149,7 @@ def read_from_exportify(status):
 
 
 # writes song list to excel file
-def write_to_excel(status):
+def write_to_excel():
     # create 2d array and append metadata to each row
     tracks_df = []
     for track in tracks:
@@ -156,11 +162,10 @@ def write_to_excel(status):
 
     excel_df.to_excel(excel_file)
 
-    status.config(text='Successfully wrote to ' + excel_file)
     print('Successfully wrote to', excel_file)
 
 
-def find_songs(status, camelot_w_key):
+def find_songs(camelot_w_key):
     # create lists for same key, relative major/minor, and key shifts up and down
     same_keys = []
     relative_keys = []
@@ -187,8 +192,6 @@ def find_songs(status, camelot_w_key):
     key_ups.sort(key=lambda x: x.tempo)
     key_downs.sort(key=lambda x: x.tempo)
 
-    status.config(text='Songs found')
-
     # build new window to display songs found
     song_window = Tk()
     song_window.geometry('800x830')
@@ -196,40 +199,40 @@ def find_songs(status, camelot_w_key):
 
     same_label = Label(song_window, font='Courier 12', text='Same Key')
     same_label.grid(row=0, column=0, sticky=W)
-    songs_label_1 = Label(song_window, anchor='w', font='Courier 8',
+    songs_label_1 = Label(song_window, anchor='w', font='Courier 12',
                           text='{:50}{:50}{:5}{:6}'.format('Track Name', 'Artist', 'Key', 'Tempo'))
     songs_label_1.grid(row=1, column=0, sticky=W)
-    same_listbox = Listbox(song_window, width=200, font='Courier 8')
+    same_listbox = Listbox(song_window, width=200, font='Courier 12')
     for i in range(len(same_keys)):
         same_listbox.insert(i, str(same_keys[i]))
     same_listbox.grid(row=2, column=0, sticky=W)
 
     relative_label = Label(song_window, font='Courier 12', text='Relative Major/Minor')
     relative_label.grid(row=3, column=0, sticky=W)
-    songs_label_2 = Label(song_window, anchor='w', font='Courier 8',
+    songs_label_2 = Label(song_window, anchor='w', font='Courier 12',
                           text='{:50}{:50}{:5}{:6}'.format('Track Name', 'Artist', 'Key', 'Tempo'))
     songs_label_2.grid(row=4, column=0, sticky=W)
-    relative_listbox = Listbox(song_window, width=200, font='Courier 8')
+    relative_listbox = Listbox(song_window, width=200, font='Courier 12')
     for i in range(len(relative_keys)):
         relative_listbox.insert(i, str(relative_keys[i]))
     relative_listbox.grid(row=5, column=0, sticky=W)
 
     up_label = Label(song_window, font='Courier 12', text='One Pitch Up (Pitch Down 1 Step to Match Key)')
     up_label.grid(row=6, column=0, sticky=W)
-    songs_label_3 = Label(song_window, anchor='w', font='Courier 8',
+    songs_label_3 = Label(song_window, anchor='w', font='Courier 12',
                           text='{:50}{:50}{:5}{:6}'.format('Track Name', 'Artist', 'Key', 'Tempo'))
     songs_label_3.grid(row=7, column=0, sticky=W)
-    up_listbox = Listbox(song_window, width=200, font='Courier 8')
+    up_listbox = Listbox(song_window, width=200, font='Courier 12')
     for i in range(len(key_ups)):
         up_listbox.insert(i, str(key_ups[i]))
     up_listbox.grid(row=8, column=0, sticky=W)
 
     down_label = Label(song_window, font='Courier 12', text='One Pitch Down (Pitch Up 1 Step to Match Key)')
     down_label.grid(row=9, column=0, sticky=W)
-    songs_label_4 = Label(song_window, anchor='w', font='Courier 8',
+    songs_label_4 = Label(song_window, anchor='w', font='Courier 12',
                           text='{:50}{:50}{:5}{:6}'.format('Track Name', 'Artist', 'Key', 'Tempo'))
     songs_label_4.grid(row=10, column=0, sticky=W)
-    up_listbox = Listbox(song_window, width=200, font='Courier 8')
+    up_listbox = Listbox(song_window, width=200, font='Courier 12')
     for i in range(len(key_downs)):
         up_listbox.insert(i, str(key_downs[i]))
     up_listbox.grid(row=11, column=0, sticky=W)
@@ -238,8 +241,116 @@ def find_songs(status, camelot_w_key):
     cancel_btn.grid(row=12, column=0, sticky=W, padx=5, pady=5)
 
 
-def open_exportify_page():
-    webbrowser.open('https://watsonbox.github.io/exportify/')
+def update_songs():
+    # authorization
+    auth_response = requests.post('https://accounts.spotify.com/api/token', {
+        'grant_type': 'client_credentials',
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
+    })
+    auth_response_data = auth_response.json()
+    access_token = auth_response_data['access_token']
+
+    # auth_response = requests.get(f'https://accounts.spotify.com/authorize?client_id={CLIENT_ID}&redirect_uri=http:%2F%2Flocalhost:8888%2Fcallback&response_type=token')
+    # print(auth_response)
+
+    print('getting list of playlists...')
+    result = json.loads(
+        requests.get(
+            f'https://api.spotify.com/v1/users/{username}/playlists',
+            headers={"Authorization": "Bearer " + access_token}
+        ).text
+    )
+    print('succesfully got playlists')
+
+    playlist_ids = []
+    # id, name, artists, key, mode, tempo
+    track_info = []
+    current_track_info = []
+
+    for playlist in result['items']:
+        print(playlist['name'])
+        playlist_ids.append(playlist['id'])
+
+    print('getting tracks...')
+    for playlist_id in playlist_ids:
+        for offset in range(0, 1000, 100):
+            l = len(current_track_info)
+            if 0 < l < offset - 1:
+                break
+            result = json.loads(
+                requests.get(
+                    f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?offset={offset}&limit=100&fields=items(track.id,track.name,track.artists.name)',
+                    headers={"Authorization": "Bearer " + access_token},
+                ).text
+            )
+            for track in result['items']:
+                artists = []
+                for artist in track['track']['artists']:
+                    artists.append(artist['name'])
+                artists_str = str(artists)
+                artists_str = artists_str.replace('[', '')
+                artists_str = artists_str.replace(']', '')
+                artists_str = artists_str.replace('\'', '')
+                current_track_info.append([track['track']['id'], track['track']['name'], artists_str])
+        track_info.extend(current_track_info)
+        current_track_info = []
+
+    # remove duplicates
+    new_track_info = []
+    for i in track_info:
+        if i not in new_track_info:
+            new_track_info.append(i)
+    track_info = new_track_info
+    print(f'succesully got {len(track_info)} tracks')
+
+    track_ids = []
+
+    track_ids_sliced = [[]]
+    track_ids_sliced_strings = []
+
+    for track_duo in track_info:
+        track_ids.append(track_duo[0])
+
+    # creating lists of 100 track ids each
+    count = 0
+    index = 0
+    for track_id in track_ids:
+        track_ids_sliced[index].append(track_id)
+        count += 1
+        if count % 100 == 0 or count == len(track_ids):
+            s = str(track_ids_sliced[index])
+            s = s.replace(' ', '')
+            s = s.replace('\'', '')
+            s = s.replace('[', '')
+            s = s.replace(']', '')
+            track_ids_sliced_strings.append(s)
+            track_ids_sliced.append([])
+            index += 1
+    i = 0
+
+    print('getting audio features data...')
+    for id_list in track_ids_sliced_strings:
+        result = json.loads(
+            requests.get(
+                f'https://api.spotify.com/v1/audio-features?ids={id_list}',
+                headers={"Authorization": "Bearer " + access_token},
+            ).text
+        )
+
+        for features in result['audio_features']:
+            try:
+                track_info[i].extend([features['key'], features['mode'], features['tempo']])
+            except:
+                track_info[i].extend([0,0,0])
+            i += 1
+    print('successfully got audio features data')
+    for info in track_info:
+        if not in_list(info[1], info[2]):
+            camelot = get_camelot(info[3], info[4])
+            # create new track with metadata from the DataFrame and add to list of tracks
+            new_track = Track(info[1], info[2], camelot, info[5], 'genre')
+            tracks.append(new_track)
 
 
 # writes an array to binary file
@@ -262,7 +373,6 @@ def read():
 
 
 if __name__ == '__main__':
-    f = open("guru99.xlsx", "w+")
 
     # read data from the binary file
     tracks = read()
@@ -271,18 +381,12 @@ if __name__ == '__main__':
     root = Tk()
     root.title('Song Finder')
     root.geometry('300x200')
-    status_var = StringVar()
-
-
 
     f1 = Frame(root)
     f1.pack(pady=5)
-    exp_btn = Button(f1, text='Choose Playlist to Add', command=lambda: open_exportify_page())
-    exp_btn.pack(side=LEFT)
-    add_btn = Button(f1, text='Add Songs from .csv', command=lambda: read_from_exportify(status_label))
+    add_btn = Button(f1, text='Update Songs', command=lambda: update_songs())
     add_btn.pack(side=LEFT, padx=5)
-    status_label = Label(root, text='--STATUS--')
-    export_btn = Button(root, text='Export to Excel File', command=lambda: write_to_excel(status_label))
+    export_btn = Button(root, text='Export to Excel File', command=lambda: write_to_excel())
     export_btn.pack()
 
     choice = StringVar()
@@ -290,10 +394,8 @@ if __name__ == '__main__':
     key_combo.current(0)
     key_combo.pack(pady=5)
 
-    find_btn = Button(root, text='Find Songs', command=lambda: find_songs(status_label, str(choice.get())))
+    find_btn = Button(root, text='Find Songs', command=lambda: find_songs(str(choice.get())))
     find_btn.pack()
-
-    status_label.pack(pady=5)
 
     quit_btn = Button(root, text='Quit', command=lambda: root.destroy())
     quit_btn.pack()
