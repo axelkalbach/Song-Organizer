@@ -7,6 +7,7 @@ from tkinter.filedialog import askopenfilename
 import webbrowser
 import requests
 import json
+from sys import argv
 
 key_camelots = ['1A - Ab Minor',
                 '1B - B Major',
@@ -38,17 +39,15 @@ camelots = ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6
 
 CLIENT_ID = 'a58508ad90a64604b7d9907850ce8463'
 CLIENT_SECRET = '781511c3415049f28e60962c3f4a5b52'
-username = 'axelkalbach'
 
 
 # track class used throughout, contains metadata about a given track
 class Track:
-    def __init__(self, name, artist, camelot, tempo, genre):
+    def __init__(self, name, artist, camelot, tempo):
         self.name = name
         self.artist = artist
         self.camelot = camelot
         self.tempo = tempo
-        self.genre = genre
 
     def __repr__(self):
         return '{:50.50}{:50.50}{:5}{:<6}\n'.format(self.name, self.artist, self.camelot, self.tempo)
@@ -86,17 +85,6 @@ def get_key_up(camelot):
     return str(int_value) + camelot[-1]
 
 
-# gets a simplistic form of the track's genre given the list of genres from the exportify file
-def get_genre(input_genre):
-    if 'rap' in input_genre.lower():
-        return 'Rap'
-    if 'edm' in input_genre.lower():
-        return 'EDM'
-    if 'pop' in input_genre.lower():
-        return 'Pop'
-    return 'Misc.'
-
-
 # changes a key value from its alphanumeric value to a numeric one
 def get_key_value(input_key):
     initial_value = int(input_key[0:1])
@@ -125,10 +113,10 @@ def write_to_excel():
     # create 2d array and append metadata to each row
     tracks_df = []
     for track in tracks:
-        tracks_df.append([track.name, track.artist, track.camelot, track.tempo, track.genre])
+        tracks_df.append([track.name, track.artist, track.camelot, track.tempo])
 
     # write data to a new DataFrame object and transfer to excel file
-    excel_df = pd.DataFrame(tracks_df, columns={'Track Name', 'Artist Name', 'Key', 'Tempo', 'Genre'})
+    excel_df = pd.DataFrame(tracks_df, columns={'Track Name', 'Artist Name', 'Key', 'Tempo'})
 
     excel_file = askopenfilename(initialdir=os.getcwd(), title="Select Excel file to write to")
 
@@ -213,7 +201,7 @@ def find_songs(camelot_w_key):
     cancel_btn.grid(row=12, column=0, sticky=W, padx=5, pady=5)
 
 
-def update_songs():
+def update_songs(username):
     # authorization
     auth_response = requests.post('https://accounts.spotify.com/api/token', {
         'grant_type': 'client_credentials',
@@ -241,7 +229,6 @@ def update_songs():
     current_track_info = []
 
     for playlist in result['items']:
-        print(playlist['name'])
         playlist_ids.append(playlist['id'])
 
     print('getting tracks...')
@@ -321,8 +308,10 @@ def update_songs():
         if not in_list(info[1], info[2]):
             camelot = get_camelot(info[3], info[4])
             # create new track with metadata from the DataFrame and add to list of tracks
-            new_track = Track(info[1], info[2], camelot, info[5], 'genre')
+            new_track = Track(info[1], info[2], camelot, info[5])
             tracks.append(new_track)
+    print('track list update complete')
+    write(tracks)
 
 
 # writes an array to binary file
@@ -349,6 +338,8 @@ if __name__ == '__main__':
     # read data from the binary file
     tracks = read()
 
+    username = argv[1]
+
     # build main window
     root = Tk()
     root.title('Song Finder')
@@ -356,7 +347,7 @@ if __name__ == '__main__':
 
     f1 = Frame(root)
     f1.pack(pady=5)
-    add_btn = Button(f1, text='Update Songs', command=lambda: update_songs())
+    add_btn = Button(f1, text='Update Songs', command=lambda: update_songs(username))
     add_btn.pack(side=LEFT, padx=5)
     export_btn = Button(root, text='Export to Excel File', command=lambda: write_to_excel())
     export_btn.pack()
