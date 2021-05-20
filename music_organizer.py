@@ -1,8 +1,11 @@
 import pandas as pd
 import pickle
 import os
+import tkinter
+from tkinter import simpledialog
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
 from tkinter.filedialog import askopenfilename
 import webbrowser
 import requests
@@ -39,6 +42,8 @@ camelots = ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6
 
 CLIENT_ID = 'a58508ad90a64604b7d9907850ce8463'
 CLIENT_SECRET = '781511c3415049f28e60962c3f4a5b52'
+
+tracks_updated = False
 
 
 # track class used throughout, contains metadata about a given track
@@ -304,14 +309,19 @@ def update_songs(username):
                 track_info[i].extend([0,0,0])
             i += 1
     print('successfully got audio features data')
+    count = 0
     for info in track_info:
         if not in_list(info[1], info[2]):
             camelot = get_camelot(info[3], info[4])
-            # create new track with metadata from the DataFrame and add to list of tracks
             new_track = Track(info[1], info[2], camelot, info[5])
             tracks.append(new_track)
-    print('track list update complete')
-    write(tracks)
+            count += 1
+
+    print(f'added {count} tracks to local file')
+    if count > 0:
+        global tracks_updated
+        tracks_updated = True
+
 
 
 # writes an array to binary file
@@ -365,5 +375,9 @@ if __name__ == '__main__':
 
     root.mainloop()
 
+    if tracks_updated:
+        answer = messagebox.askyesno("Question","Save updates?")
+        if answer:
+            write(tracks)
 
 
