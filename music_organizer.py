@@ -120,6 +120,7 @@ def write_to_excel():
     for track in tracks:
         tracks_df.append([track.name, track.artist, track.camelot, track.tempo])
 
+        print(len(tracks_df))
     # write data to a new DataFrame object and transfer to excel file
     excel_df = pd.DataFrame(tracks_df, columns={'Track Name', 'Artist Name', 'Key', 'Tempo'})
 
@@ -226,7 +227,7 @@ def update_songs(username):
             headers={"Authorization": "Bearer " + access_token}
         ).text
     )
-    print('succesfully got playlists')
+    print('succesfully got playlists:')
 
     playlist_ids = []
     # id, name, artists, key, mode, tempo
@@ -234,11 +235,12 @@ def update_songs(username):
     current_track_info = []
 
     for playlist in result['items']:
+        print(playlist['name'])
         playlist_ids.append(playlist['id'])
 
     print('getting tracks...')
     for playlist_id in playlist_ids:
-        for offset in range(0, 1000, 100):
+        for offset in range(0, 10000, 100):
             l = len(current_track_info)
             if 0 < l < offset - 1:
                 break
@@ -379,5 +381,3 @@ if __name__ == '__main__':
         answer = messagebox.askyesno("Question","Save updates?")
         if answer:
             write(tracks)
-
-
