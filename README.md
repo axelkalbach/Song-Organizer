@@ -7,7 +7,7 @@ This script allows spotify playlists to be added to a local list of tracks and a
 # Usage
 ### Running the Program
 1. Navigate to your directory in the command line: ```cd /Your-Directory```
-2. Run the python script with your spotify username: ```python music_organizer.py ["your username"]```
+2. Run the python script with your spotify username: ```python music_organizer.py [your username]```
 ### Adding New Songs
 1. Click 'Update Songs'
 2. All tracks from your public playlists will be added
